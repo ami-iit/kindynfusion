@@ -20,6 +20,7 @@
 
 
 ```
+cd kindynfusion
 mkdir build
 cmake -DALLOW_IDL_GENERATION=ON -DCMAKE_INSTALL_PREFIX=<path-to-installation-folder> ..
 make
