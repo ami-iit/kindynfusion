@@ -1,0 +1,19 @@
+<application>
+  <name>Whole Body Kinematics Estimator Startup</name>
+  <description>launch applications for running whole body kinematics with offline datastreaming</description>
+
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematicsXSensSuit.xml</parameters>
+    <!-- environment>YARP_CLOCK=/clock</environment -->
+    <node>localhost</node>
+  </module>
+
+  <module>
+    <name>yarpdataplayer</name>
+    <parameters>--withExtraTimeCol 2</parameters>
+    <node>localhost</node>
+  </module>
+
+</application>
+

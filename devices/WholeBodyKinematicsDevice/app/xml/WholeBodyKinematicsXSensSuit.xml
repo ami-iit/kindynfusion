@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.0//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.0.dtd">
+<robot name="Human-WBK" build=0 portprefix="human">
+
+    <device type="iwear_remapper" name="XSenseIWearRemapper">
+        <param name="wearableDataPorts">(/XSensSuit/WearableData/data:o /FTShoeLeft/WearableData/data:o /FTShoeRight/WearableData/data:o)</param>
+        <param name="useRPC">false</param>
+        <param name="wearableRPCPorts">(/XSensSuit/WearableData/metadataRpc:o)</param>
+        <param name="outputPortName">/HDE/XsensIWearRemapper/data:o</param>
+    </device>
+
+    <device type="WholeBodyKinematicsDevice" name="whole_body_kinematics">
+        <param name="period">0.02</param>
+
+        <!-- Model Data Parameters -->
+        <param name="urdf">humanSubject08_66dof.urdf</param>
+        <param name="baseFrame">Pelvis</param>
+        <param name="jointList">("jL5S1_rotx", "jL5S1_roty", "jL4L3_rotx", "jL4L3_roty",
+                                 "jL1T12_rotx", "jL1T12_roty",
+                                 "jT9T8_rotx", "jT9T8_roty", "jT9T8_rotz",
+                                 "jT1C7_rotx", "jT1C7_roty", "jT1C7_rotz",
+                                 "jC1Head_rotx", "jC1Head_roty",
+                                 "jRightHip_rotx", "jRightHip_roty", "jRightHip_rotz",
+                                 "jRightKnee_roty", "jRightKnee_rotz",
+                                 "jRightAnkle_rotx", "jRightAnkle_roty", "jRightAnkle_rotz",
+                                 "jLeftHip_rotx", "jLeftHip_roty", "jLeftHip_rotz",
+                                 "jLeftKnee_roty", "jLeftKnee_rotz",
+                                 "jLeftAnkle_rotx", "jLeftAnkle_roty", "jLeftAnkle_rotz",
+                                 "jRightC7Shoulder_rotx", "jRightShoulder_rotx",
+                                 "jRightShoulder_roty", "jRightShoulder_rotz",
+                                 "jRightElbow_roty", "jRightElbow_rotz",
+                                 "jRightWrist_rotx", "jRightWrist_rotz",
+                                 "jLeftC7Shoulder_rotx",
+                                 "jLeftShoulder_rotx", "jLeftShoulder_roty", "jLeftShoulder_rotz",
+                                 "jLeftElbow_roty", "jLeftElbow_rotz",
+                                 "jLeftWrist_rotx", "jLeftWrist_rotz")</param>
+
+        <!-- IK Parameters -->
+        <!-- ikSolver options: dynamical -->
+        <param name="ikSolver">dynamical</param>
+        <param name="useFixedBase">false</param>
+
+        <!-- Dynamical IK Parameters -->
+        <!-- inverseVelocityKinematicsSolver values:
+             QP
+             moorePenrose,
+             completeOrthogonalDecomposition,
+             leastSquare,
+             choleskyDecomposition,
+             sparseCholeskyDecomposition,
+             robustCholeskyDecomposition,
+             sparseRobustCholeskyDecomposition -->
+        <param name='inverseVelocityKinematicsSolver'>QP</param>
+        <param name="useDirectBaseMeasurement">false</param>
+        <param name="costRegularization">0.000001</param>
+        <param name="linVelTargetWeight">1.0</param>
+        <param name="angVelTargetWeight">1.0</param>
+        <param name='dynamicalIKJointVelocityLimit'>10.0</param> <!-- comment or -1.0 for no limits -->
+        <param name="dynamicalIKMeasuredVelocityGainLinRot">(1.0 1.0)</param>
+        <param name="dynamicalIKCorrectionGainsLinRot">(8.0 20.0)</param>
+
+        <group name="WEARABLE_SENSOR_TARGETS">
+            <!-- LinkName, WearableSensorName, TargetType-->
+            <!-- TargetType : {pose, poseAndVelocity, position, positionAndVelocity, orientation, orientationAndVelocity}-->
+            <param name="target_Pelvis">(Pelvis, XsensSuit::vLink::Pelvis, poseAndVelocity)</param>
+            <param name="target_L5">(L5, XsensSuit::vLink::L5, orientationAndVelocity)</param>
+            <param name="target_L3">(L3, XsensSuit::vLink::L3, orientationAndVelocity)</param>
+            <param name="target_T12">(T12, XsensSuit::vLink::T12, orientationAndVelocity)</param>
+            <param name="target_T8">(T8, XsensSuit::vLink::T8, orientationAndVelocity)</param>
+            <param name="target_Neck">(Neck, XsensSuit::vLink::Neck, orientationAndVelocity)</param>
+            <param name="target_Head">(Head, XsensSuit::vLink::Head, orientationAndVelocity)</param>
+            <param name="target_RightShoulder">(RightShoulder, XsensSuit::vLink::RightShoulder, orientationAndVelocity)</param>
+            <param name="target_RightUpperArm">(RightUpperArm, XsensSuit::vLink::RightUpperArm, orientationAndVelocity)</param>
+            <param name="target_RightForeArm">(RightForeArm, XsensSuit::vLink::RightForeArm, orientationAndVelocity)</param>
+            <param name="target_RightHand">(RightHand, XsensSuit::vLink::RightHand, orientationAndVelocity)</param>
+            <param name="target_LeftShoulder">(LeftShoulder, XsensSuit::vLink::LeftShoulder, orientationAndVelocity)</param>
+            <param name="target_LeftUpperArm">(LeftUpperArm, XsensSuit::vLink::LeftUpperArm, orientationAndVelocity)</param>
+            <param name="target_LeftForeArm">(LeftForeArm, XsensSuit::vLink::LeftForeArm, orientationAndVelocity)</param>
+            <param name="target_LeftHand">(LeftHand, XsensSuit::vLink::LeftHand, orientationAndVelocity)</param>
+            <param name="target_RightUpperLeg">(RightUpperLeg, XsensSuit::vLink::RightUpperLeg, orientationAndVelocity)</param>
+            <param name="target_RightLowerLeg">(RightLowerLeg, XsensSuit::vLink::RightLowerLeg, orientationAndVelocity)</param>
+            <param name="target_RightFoot">(RightFoot, XsensSuit::vLink::RightFoot, orientationAndVelocity)</param>
+<!--             <param name="target_RightToe">(RightToe, XsensSuit::vLink::RightToe, orientationAndVelocity)</param> -->
+            <param name="target_LeftUpperLeg">(LeftUpperLeg, XsensSuit::vLink::LeftUpperLeg, orientationAndVelocity)</param>
+            <param name="target_LeftLowerLeg">(LeftLowerLeg, XsensSuit::vLink::LeftLowerLeg, orientationAndVelocity)</param>
+            <param name="target_LeftFoot">(LeftFoot, XsensSuit::vLink::LeftFoot, orientationAndVelocity)</param>
+<!--             <param name="target_LeftToe">(LeftToe, XsensSuit::vLink::LeftToe, orientationAndVelocity)</param> -->
+        </group>
+
+        <group name="WEARABLE_SENSOR_SHOES">
+            <!-- transformation matrix of foot to shoe merged -->
+            <!-- see https://github.com/ami-iit/element_sandals/wiki/Specifications -->
+            <param name="FTShoeLeftFTSensors">(LeftFoot,
+                                              ( 1.0   0.0  0.0  -0.02
+                                                0.0   1.0  0.0    0.0
+                                                0.0   0.0  1.0 -0.135
+                                                0.0   0.0  0.0  1.0 ))</param>
+            <param name="FTShoeRightFTSensors">(RightFoot,
+                                               (1.0   0.0  0.0  -0.02
+                                                0.0   1.0  0.0    0.0
+                                                0.0   0.0  1.0 -0.135
+                                                0.0   0.0  0.0    1.0 ))</param>
+        </group>
+
+        <group name="FOOT_DATA">
+            <param name="foot_link_names">(LeftFoot, RightFoot)</param>
+            <group name="LeftFoot">
+                <param name="wearable_name">FTShoeLeftFTSensors</param>
+                <param name="sole_frame">LeftSole</param>
+                <param name="sole_position_in_foot">(0., 0., -0.039369)</param>
+                <param name="sole_rpy_degrees_in_foot">(0., 0., 0.)</param>
+                <param name="foot_length">0.18527</param>
+                <param name="foot_width">0.069048</param>
+                <param name="fz_threshold_for_cop">2.0</param>
+                <param name="schmitt_make_threshold">35.0</param>
+                <param name="schmitt_break_threshold">25.0</param>
+                <param name="schmitt_make_switch_time">0.01</param>
+                <param name="schmitt_break_switch_time">0.01</param>
+                <param name="top_left_vertex_in_sole">(0.13, 0.034524, 0.0)</param>
+            </group>
+            <group name="RightFoot">
+                <param name="wearable_name">FTShoeRightFTSensors</param>
+                <param name="sole_frame">RightSole</param>
+                <param name="sole_position_in_foot">(0., 0., -0.039369)</param>
+                <param name="sole_rpy_degrees_in_foot">(0., 0., 0.)</param>
+                <param name="foot_length">0.18527</param>
+                <param name="foot_width">0.069048</param>
+                <param name="fz_threshold_for_cop">2.0</param>
+                <param name="schmitt_make_threshold">35.0</param>
+                <param name="schmitt_break_threshold">25.0</param>
+                <param name="schmitt_make_switch_time">0.01</param>
+                <param name="schmitt_break_switch_time">0.01</param>
+                <param name="top_left_vertex_in_sole">(0.13, 0.034524, 0.0)</param>
+            </group>
+        </group>
+
+        <group name="MEASUREMENT_TO_LINK_TRANSFORMS">
+            <param name="target_LeftHand">( 1.0   0.0  0.0  0.0
+                                            0.0  -1.0  0.0  0.025
+                                            0.0   0.0 -1.0  0.11
+                                            0.0   0.0  0.0  1.0)</param>
+            <param name="target_RightHand">(-1.0  0.0  0.0  0.0
+                                             0.0  1.0  0.0  0.025
+                                             0.0  0.0 -1.0  0.11
+                                             0.0  0.0  0.0  1.0)</param>
+            <param name="target_Head">( 0.0 -1.0  0.0  0.0
+                                        0.0  0.0  1.0  0.0
+                                       -1.0  0.0  0.0  0.1
+                                        0.0  0.0  0.0  1.0)</param>
+        </group>
+        <group name="MEASUREMENT_POSITION_SCALE_FACTOR">
+            <param name="target_Head">( 0.7 0.7 0.6 )</param>
+            <param name="target_LeftHand">( 0.7 0.7 0.6 )</param>
+            <param name="target_RightHand">( 0.7 0.7 0.6 )</param>
+        </group>
+
+        <group name="CUSTOM_CONSTRAINTS">
+        <!-- check issue https://github.com/robotology/human-dynamics-estimation/issues/132 for more info-->
+        <!-- note that a group can not be empty, otherwise it returns error-->
+        <!-- custom joint limits velocities-->
+<!--             <param name="custom_joints_velocity_limits_names">(neck_roll, neck_pitch)</param> -->
+            <param name="custom_joints_velocity_limits_names">()</param>
+            <!-- the upper bound is "+", while the lower bounds are "-" -->
+<!--             <param name="custom_joints_velocity_limits_values">(10.0, 15.0)</param> -->
+            <param name="custom_joints_velocity_limits_values">()</param>
+        <!-- **** base velocity limit: roll, pitch, yaw, x, y, z ****-->
+<!--            <param name="base_velocity_limit_upper_bound">(1.0, 1.0, 1.0, 1.0, 1.0, 1.0 )</param>
+            <param name="base_velocity_limit_lower_bound">(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0 )</param>-->
+        <!-- Custom joint Configuration constraints-->
+        <!-- if the boudary value is inf, I will use -1000.0 rad, or +1000.0 rad-->
+<!--        <param name="custom_constraint_variables">(
+        l_shoulder_pitch, l_shoulder_roll, l_shoulder_yaw, l_elbow, l_wrist_prosup,
+        r_shoulder_pitch, r_shoulder_roll, r_shoulder_yaw, r_elbow, r_wrist_prosup)</param>
+        <param name="custom_constraint_matrix"> (
+        (1.7105, -1.7105,  0.0,     0.0,    0.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (1.7105, -1.7105,  -1.7105, 0.0,    0.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    1.0,      1.0,     0.0,    0.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    1.0,      0.0427,  0.0,    0.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    1.0,      0.0,     0.0,    0.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    0.0,      0.0,     2.5,    1.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    0.0,      0.0,     -2.5,   1.0,    0.0,     0.0,      0.0,       0.0,    0.0),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    1.7105,  -1.7105,  0.0,       0.0,    0.0),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    1.7105,  -1.7105,  -1.7105,   0.0,    0.0,),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    0.0,     1.0,       1.0,      0.0,    0.0,),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    0.0,     1.0,       0.0427,   0.0,    0.0,),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    0.0,     1.0,       0.0,      0.0,    0.0,),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    0.0,     0.0,       0.0,      2.5,    1.0,),
+        (0.0,    0.0,      0.0,     0.0,    0.0,    0.0,     0.0,       0.0,      -2.5,   1.0,),
+        )</param>
+        <param name="custom_constraint_lower_bound"> (
+        -6.0563,  -6.3979,  -1.1623,  0.4611,  -1000.0,  -1000.0,  -5.2796,
+        -6.0563,  -6.3979,  -1.1623,  0.4611,  -1000.0,  -1000.0,  -5.2796)</param>
+        <param name="custom_constraint_upper_bound"> (
+        1000.0,  1.9622,  3.7228,  1000.0,  1.7453,  5.2796,  1000.0,
+        1000.0,  1.9622,  3.7228,  1000.0,  1.7453,  5.2796,  1000.0)</param>-->
+            <!-- The following two parameters should be set always , if not set they are by default 0.5 -->
+            <param name="k_u">0.5</param>
+            <param name="k_l">0.5</param>
+        </group>
+
+
+        <action phase="startup" level="6" type="attach">
+            <paramlist name="networks">
+                <elem name="HumanStateProviderLabel">XSenseIWearRemapper</elem>
+<!--                 <elem name="HumanDynamicsEstimatorLabel2">HumanWrenchProvider</elem> -->
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+    <device type="WholeBodyKinematicsWrapper" name="whole_body_kinematics_wrapper">
+        <param name="period">0.02</param>
+        <param name="outputPort">/HDE1/WholeBodyKinematicsWrapper/state:o</param>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="WholeBodyKinematicsWrapperLabel">whole_body_kinematics</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+</robot>

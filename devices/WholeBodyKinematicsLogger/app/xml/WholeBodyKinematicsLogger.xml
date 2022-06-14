@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.0//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.0.dtd">
+<robot name="Human-HDE-Viz" build=0 portprefix="">
+
+    <device type="WholeBodyKinematicsLogger" name="whole_body_kinematics_logger">
+        <param name="period">0.02</param>
+        <param name="wholeBodyKinematicsDataPortName">/HDE1/WholeBodyKinematicsWrapper/state:o</param>
+
+        <param name="logIHumanState">true</param>
+        <param name="humanStateProviderDataPortName">/HDE1/HumanStateWrapper/state:o</param>
+
+        <param name="logGroundTruth">true</param>
+        <param name="groundTruthFrameTransformPortName">/transformServer</param>
+        <param name="groundTruthReferenceFrame">openVR_origin</param>
+        <param name="grountTruthBaseTrackerName">/trackers/LHR-87B324E3</param>
+        <param name="telemetry_autosave_period">600.0</param>
+    </device>
+</robot>
