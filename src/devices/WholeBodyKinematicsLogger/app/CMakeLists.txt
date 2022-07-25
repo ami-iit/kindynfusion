@@ -8,5 +8,5 @@ set (WBK_PROJECT_NAME WholeBodyKinematicsLogger)
 file (GLOB WBK_XML_FILES xml/*.xml)
 
 install(FILES ${WBK_XML_FILES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${WBK_PROJECT_NAME}/)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/yarp/)
 
