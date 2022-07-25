@@ -13,7 +13,7 @@ find_package(spdlog 1.5.0 REQUIRED)
 find_package(BipedalLocomotionFramework 0.7.0 REQUIRED)
 find_package(IWear 1.4.0 REQUIRED)
 
-find_package(YARP COMPONENTS telemetry)
+find_package(robometry 1.0.0 REQUIRED)
 
 find_package(OsqpEigen 0.7.0 QUIET)
 checkandset_dependency(OsqpEigen)

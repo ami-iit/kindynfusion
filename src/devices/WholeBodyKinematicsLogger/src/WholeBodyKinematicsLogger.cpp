@@ -14,7 +14,7 @@
 #include <yarp/dev/IFrameTransform.h>
 #include <iDynTree/yarp/YARPConversions.h>
 
-#include <yarp/telemetry/experimental/BufferManager.h>
+#include <robometry/BufferManager.h>
 
 using namespace KinDynFusion;
 using namespace KinDynFusion::Estimators;
@@ -44,13 +44,14 @@ public:
     double timeNow;
 
     bool logGroundTruth{false};
+    bool logDuringMissingGroundTruthData{true};
     yarp::dev::IFrameTransform* iTF{nullptr};
     std::string tfPortName;
     std::string groundTruthRefFrame;
     std::string baseTrackerName;
     yarp::dev::PolyDriver transformClient;
 
-    yarp::telemetry::experimental::BufferManager<double> bufferManager;
+    robometry::BufferManager bufferManager;
 
     // buffer variables
     std::array<double, 3> basePositionInterface;
@@ -70,9 +71,8 @@ public:
     std::string baseNameInterface;
     iDynTree::Vector4 baseOrientationQuaternion, lfOrientationQuaternion, rfOrientationQuaternion;
     iDynTree::Rotation wRb, wRlf, wRrf;
-    iDynTree::Vector3 wRbRPY, wRlfRPY, wRrfRPY;
     std::vector<std::string> vertexContactNamesInterface;
-
+    std::array<double, 3> wRblog,wRlflog, wRrflog;
 
     std::array<double, 3> hspBasePositionInterface;
     std::array<double, 4> hspBaseOrientationInterface;
@@ -82,11 +82,11 @@ public:
     std::vector<std::string> hspJointNamesInterface;
     iDynTree::Vector4 hspBaseOrientationQuaternion;
     iDynTree::Rotation hspWRb;
-    iDynTree::Vector3 hspWRbRPY;
+    std::array<double, 3> hspWRblog;
 
     yarp::sig::Matrix groundTruthBasePoseYarp;
     iDynTree::Transform groundTruthBasePoseDyn;
-    iDynTree::Vector3 groundTruthwRbRPY, groundTruthwPb;
+    std::array<double, 3> gtRblog, gtPblog;
 };
 
 WholeBodyKinematicsLogger::WholeBodyKinematicsLogger(double period,
@@ -156,6 +156,12 @@ bool WholeBodyKinematicsLogger::open(yarp::os::Searchable& config)
                                                      /*required=*/false);
     if (pImpl->logGroundTruth)
     {
+        KinDynFusion::IK::YarpHelper::checkAndLoadScalar(config,
+                                                         "logDuringMissingGroundTruthData",
+                                                         pImpl->logDuringMissingGroundTruthData,
+                                                         /*defaultValue=*/true,
+                                                         /*required=*/false);
+
         if (!KinDynFusion::IK::YarpHelper::checkAndLoadScalar(config,
                                                             std::string{"groundTruthFrameTransformPortName"},
                                                             pImpl->tfPortName,
@@ -338,8 +344,53 @@ bool WholeBodyKinematicsLogger::open(yarp::os::Searchable& config)
 
 void WholeBodyKinematicsLogger::run()
 {
-    // Get data from the interface
+    bool breakRun{false};
     pImpl->timeNow = yarp::os::Time::now();
+    if (pImpl->logGroundTruth)
+    {
+        if (pImpl->iTF->frameExists(pImpl->baseTrackerName))
+        {
+            std::string parentFrame;
+            pImpl->iTF->getParent(pImpl->baseTrackerName, parentFrame);
+            if (parentFrame == pImpl->groundTruthRefFrame)
+            {
+                bool ok = pImpl->iTF->getTransform(pImpl->baseTrackerName,
+                                                   parentFrame,
+                                                   pImpl->groundTruthBasePoseYarp);
+                if (ok)
+                {
+                    toiDynTree(pImpl->groundTruthBasePoseYarp, pImpl->groundTruthBasePoseDyn);
+
+                    for (std::size_t idx = 0; idx < 3; idx++)
+                    {
+                        pImpl->gtPblog[idx] = pImpl->groundTruthBasePoseDyn.getPosition()(idx);
+                        pImpl->gtRblog[idx] = pImpl->groundTruthBasePoseDyn.getRotation().asRPY()(idx);
+                    }
+                }
+            }
+
+            pImpl->bufferManager.push_back(pImpl->gtPblog,
+                                       pImpl->timeNow,
+                                       "ground_truth::base_state::position");
+            pImpl->bufferManager.push_back(pImpl->gtRblog,
+                                       pImpl->timeNow,
+                                       "ground_truth::base_state::orientation");
+        }
+        else
+        {
+            // skip logging data when ground truth data is not available
+            breakRun = true;
+        }
+
+    }
+
+    if (breakRun && !pImpl->logDuringMissingGroundTruthData)
+    {
+        yInfo() << "[WholeBodyKinematicsLogger][run] breaking run since ground truth data unavailable.";
+        return;
+    }
+
+    // Get data from the interface
     pImpl->basePositionInterface = pImpl->iWBK->getBasePosition();
     pImpl->baseOrientationInterface = pImpl->iWBK->getBaseOrientation();
     pImpl->baseVelocityInterface = pImpl->iWBK->getBaseVelocity();
@@ -356,26 +407,20 @@ void WholeBodyKinematicsLogger::run()
     for (std::size_t idx = 0; idx < 4; idx++)
     {
         pImpl->baseOrientationQuaternion.setVal(idx, pImpl->baseOrientationInterface[idx]);
-    }
-
-    pImpl->wRb.fromQuaternion(pImpl->baseOrientationQuaternion);
-    pImpl->wRbRPY = pImpl->wRb.asRPY();
-
-    for (std::size_t idx = 0; idx < 4; idx++)
-    {
         pImpl->lfOrientationQuaternion.setVal(idx, pImpl->lfOrientationInterface[idx]);
-    }
-
-    pImpl->wRlf.fromQuaternion(pImpl->lfOrientationQuaternion);
-    pImpl->wRlfRPY = pImpl->wRlf.asRPY();
-
-    for (std::size_t idx = 0; idx < 4; idx++)
-    {
         pImpl->rfOrientationQuaternion.setVal(idx, pImpl->rfOrientationInterface[idx]);
     }
 
+    pImpl->wRb.fromQuaternion(pImpl->baseOrientationQuaternion);
+    pImpl->wRlf.fromQuaternion(pImpl->lfOrientationQuaternion);
     pImpl->wRrf.fromQuaternion(pImpl->rfOrientationQuaternion);
-    pImpl->wRrfRPY = pImpl->wRrf.asRPY();
+
+    for (std::size_t idx = 0; idx < 3; idx++)
+    {
+        pImpl->wRblog[idx] = pImpl->wRb.asRPY()(idx);
+        pImpl->wRlflog[idx] = pImpl->wRlf.asRPY()(idx);
+        pImpl->wRrflog[idx] = pImpl->wRrf.asRPY()(idx);
+    }
 
     pImpl->contactDataInterface = pImpl->iWBK->getAllVertexContactData();
     for (const auto& vertexData : pImpl->contactDataInterface)
@@ -418,7 +463,7 @@ void WholeBodyKinematicsLogger::run()
     pImpl->bufferManager.push_back(pImpl->basePositionInterface,
                                    pImpl->timeNow,
                                    "base_state::position");
-    pImpl->bufferManager.push_back(pImpl->wRbRPY,
+    pImpl->bufferManager.push_back(pImpl->wRblog,
                                    pImpl->timeNow,
                                    "base_state::orientation");
     pImpl->bufferManager.push_back(pImpl->baseVelocityInterface,
@@ -437,10 +482,10 @@ void WholeBodyKinematicsLogger::run()
     pImpl->bufferManager.push_back(pImpl->rCoPPositionInterface,
                                    pImpl->timeNow,
                                    "right_foot::cop");
-    pImpl->bufferManager.push_back(pImpl->wRlfRPY,
+    pImpl->bufferManager.push_back(pImpl->wRlflog,
                                    pImpl->timeNow,
                                    "left_foot::orientation");
-    pImpl->bufferManager.push_back(pImpl->wRrfRPY,
+    pImpl->bufferManager.push_back(pImpl->wRrflog,
                                    pImpl->timeNow,
                                    "right_foot::orientation");
     pImpl->bufferManager.push_back(pImpl->globalCoPPositionInterface,
@@ -461,12 +506,16 @@ void WholeBodyKinematicsLogger::run()
         }
 
         pImpl->hspWRb.fromQuaternion(pImpl->hspBaseOrientationQuaternion);
-        pImpl->hspWRbRPY = pImpl->hspWRb.asRPY();
+
+        for (std::size_t idx = 0; idx < 3; idx++)
+        {
+            pImpl->hspWRblog[idx] = pImpl->hspWRb.asRPY()(idx);
+        }
 
         pImpl->bufferManager.push_back(pImpl->hspBasePositionInterface,
                                        pImpl->timeNow,
                                        "hsp::base_state::position");
-        pImpl->bufferManager.push_back(pImpl->hspWRbRPY,
+        pImpl->bufferManager.push_back(pImpl->hspWRblog,
                                        pImpl->timeNow,
                                        "hsp::base_state::orientation");
         pImpl->bufferManager.push_back(pImpl->hspBaseVelocityInterface,
@@ -478,36 +527,6 @@ void WholeBodyKinematicsLogger::run()
         pImpl->bufferManager.push_back(pImpl->hspJointVelocitiesInterface,
                                        pImpl->timeNow,
                                        "hsp::joints_state::velocities");
-    }
-
-    if (pImpl->logGroundTruth)
-    {
-        if (pImpl->iTF->frameExists(pImpl->baseTrackerName))
-        {
-            std::string parentFrame;
-            pImpl->iTF->getParent(pImpl->baseTrackerName, parentFrame);
-            if (parentFrame == pImpl->groundTruthRefFrame)
-            {
-                bool ok = pImpl->iTF->getTransform(pImpl->baseTrackerName,
-                                                   parentFrame,
-                                                   pImpl->groundTruthBasePoseYarp);
-                if (ok)
-                {
-                    toiDynTree(pImpl->groundTruthBasePoseYarp, pImpl->groundTruthBasePoseDyn);
-                    for (std::size_t idx = 0; idx < 3; idx++)
-                    {
-                        pImpl->groundTruthwPb(idx) = pImpl->groundTruthBasePoseDyn.getPosition()(idx);
-                    }
-                    pImpl->groundTruthwRbRPY = pImpl->groundTruthBasePoseDyn.getRotation().asRPY();
-                }
-            }
-        }
-        pImpl->bufferManager.push_back(pImpl->groundTruthwPb,
-                                       pImpl->timeNow,
-                                       "ground_truth::base_state::position");
-        pImpl->bufferManager.push_back(pImpl->groundTruthwRbRPY,
-                                       pImpl->timeNow,
-                                       "ground_truth::base_state::orientation");
     }
 }
 
@@ -570,7 +589,7 @@ bool WholeBodyKinematicsLogger::Impl::initializeLogger()
 
 bool WholeBodyKinematicsLogger::Impl::setupLogger()
 {
-    yarp::telemetry::experimental::BufferConfig config;
+    robometry::BufferConfig config;
     config.filename = "whole_body_kinematics_logger";
     config.auto_save = true;
     config.save_periodically = true;

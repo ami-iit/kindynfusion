@@ -12,7 +12,7 @@ add_kindynfusion_yarp_device(
   APP TRUE
   PUBLIC_LINK_LIBRARIES ${YARP_LIBRARIES}
                         ${iDynTree_LIBRARIES}
-                        YARP::YARP_telemetry
+                        robometry::robometry
                         KinDynFusion::FloatingBaseEstimators
                         KinDynFusion::InverseKinematicsYarpHelper
   CONFIGURE_PACKAGE_NAME whole_body_kinematics_logger)
