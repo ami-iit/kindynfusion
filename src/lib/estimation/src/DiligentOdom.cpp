@@ -215,6 +215,8 @@ public:
     std::unordered_map<std::string, Eigen::Quaterniond> footPlaneOrientationMeasurementMap;
 
     bool m_forceFlatFloor{false};
+    bool m_useVelocityMeasurements{false};
+    bool m_useZeroBaseVelocities{false};
 };
 
 
@@ -371,7 +373,7 @@ bool DiligentOdom::setupCustomSensorDevs(std::weak_ptr<BipedalLocomotion::Parame
     return true;
 }
 
-bool DiligentOdom::customInitialization(std::weak_ptr<const BipedalLocomotion::ParametersHandler::IParametersHandler> handler)
+bool DiligentOdom::customInitialization(std::weak_ptr<BipedalLocomotion::ParametersHandler::IParametersHandler> handler)
 {
     std::string printPrefix{"[DiligentOdom::customInitialization] "};
     auto handle = handler.lock();
@@ -379,6 +381,12 @@ bool DiligentOdom::customInitialization(std::weak_ptr<const BipedalLocomotion::P
     {
         log()->error("{} The parameter handler has expired. Please check its scope.", printPrefix);
         return false;
+    }
+
+    handle->getParameter("use_velocity_measurements", m_pimpl->m_useVelocityMeasurements);
+    if (m_pimpl->m_useVelocityMeasurements)
+    {
+        handle->getParameter("use_zero_base_velocity", m_pimpl->m_useZeroBaseVelocities);
     }
 
     // setup options related entities
@@ -727,22 +735,25 @@ bool DiligentOdom::updateKinematics(FloatingBaseEstimators::Measurements& meas,
         return false;
     }
 
-    if (!m_pimpl->updateWithZUPTLinearVelocity(meas, m_modelComp, m_sensorsDev, m_pimpl->m_X.rows(), dt, nrContacts,  m_state))
+    if (m_pimpl->m_useVelocityMeasurements)
     {
-        log()->error("[DiligentOdom::updateKinematics] Could not update states with ZUPT linear velocity.");
-        return false;
-    }
+        if (!m_pimpl->updateWithZUPTLinearVelocity(meas, m_modelComp, m_sensorsDev, m_pimpl->m_X.rows(), dt, nrContacts,  m_state))
+        {
+            log()->error("[DiligentOdom::updateKinematics] Could not update states with ZUPT linear velocity.");
+            return false;
+        }
 
-    if (!m_pimpl->updateWithZUPTAngularVelocity(meas, m_modelComp, m_sensorsDev, m_pimpl->m_X.rows(), dt, nrContacts,  m_state))
-    {
-        log()->error("[DiligentOdom::updateKinematics] Could not update states with ZUPT angular velocity.");
-        return false;
-    }
+        if (!m_pimpl->updateWithZUPTAngularVelocity(meas, m_modelComp, m_sensorsDev, m_pimpl->m_X.rows(), dt, nrContacts,  m_state))
+        {
+            log()->error("[DiligentOdom::updateKinematics] Could not update states with ZUPT angular velocity.");
+            return false;
+        }
 
-    if (!m_pimpl->updateWithBaseAngularVelocity(m_pimpl->m_X.rows(), dt, m_state))
-    {
-        log()->error("[DiligentOdom::updateKinematics] Could not update states with base angular velocity measurement.");
-        return false;
+        if (!m_pimpl->updateWithBaseAngularVelocity(m_pimpl->m_X.rows(), dt, m_state))
+        {
+            log()->error("[DiligentOdom::updateKinematics] Could not update states with base angular velocity measurement.");
+            return false;
+        }
     }
 
     if (!m_pimpl->updateWithRelativeFootOrientations(meas, m_modelComp, dt, m_state))
@@ -1006,7 +1017,9 @@ bool DiligentOdom::Impl::updateWithRelativeVertexPositions(FloatingBaseEstimator
         // if we consider only one contact, Y and b are of the form
         // Y = [d; 1; 0; -1; zeros(3,1); 0; zeros(3,1)];
         // b = [zeros(3,1); 1; 0; -1; zeros(3,1); 0; zeros(3,1)];
-        m_Yk.segment<4>(yStart) << iDynTree::toEigen(modelComp.kinDyn()->getRelativeTransform(modelComp.baseIMUIdx(), frameIdx).getPosition()), 1;
+        auto b_pos_f = modelComp.kinDyn()->getRelativeTransform(modelComp.baseIMUIdx(), frameIdx).getPosition();
+        m_Yk.segment<4>(yStart) << iDynTree::toEigen(b_pos_f), 1;
+
         m_Yk(yStart + feetOffsetInX + idx) = -1;
         m_bk(yStart + 3) = 1;
         m_bk(yStart + feetOffsetInX + idx) = -1;
@@ -1151,7 +1164,15 @@ bool DiligentOdom::Impl::updateWithZUPTLinearVelocity(FloatingBaseEstimators::Me
                 // if we consider only one contact, Y and b are of the form
                 // Y = [vlin; 0; -1; 0; zeros(3, 1); 0, zeros(3,1)];
                 //  b = [zeros(3, 1); 0; -1; 0; zeros(3,1); 0; zeros(3,1)];
-                m_Yk.segment<5>(yStart) << m_vb.head<3>(), 0, -1;
+
+                if (!m_useZeroBaseVelocities)
+                {
+                    m_Yk.segment<5>(yStart) << m_vb.head<3>(), 0, -1;
+                }
+                else
+                {
+                    m_Yk.segment<5>(yStart) << 0, 0, 0, 0, -1;
+                }
                 m_bk(yStart+4) = -1;
                 m_Pik.block<3, 3>(obsStart, yStart) = m_I3;
                 m_Hk.block<3, 3>(obsStart, imuLinearVelOffset) = m_I3; // J_y_v
@@ -1241,7 +1262,14 @@ bool DiligentOdom::Impl::updateWithZUPTAngularVelocity(FloatingBaseEstimators::M
                 // if we consider only one contact, Y and b are of the form
                 // Y = [zeros(3, 1); 0; 0; 0; omega; -1, zeros(3,1)];
                 // b = [zeros(3, 1); 0; 0; 0; zeros(3, 1); -1, zeros(3,1)];
-                m_Yk.segment<4>(yStart) << m_vb.tail<3>(), -1;
+                if (!m_useZeroBaseVelocities)
+                {
+                    m_Yk.segment<4>(yStart) << m_vb.tail<3>(), -1;
+                }
+                else
+                {
+                    m_Yk.segment<4>(yStart) << 0, 0, 0, -1;
+                }
                 m_bk(yStart+3) = -1;
                 m_Pik.block<3, 3>(obsStart, yStart) = m_I3;
                 m_Hk.block<3, 3>(obsStart, angVelOffset) = m_I3; // J_y_v
@@ -1298,7 +1326,14 @@ bool DiligentOdom::Impl::updateWithBaseAngularVelocity(const std::size_t& Xsize,
     // if we consider only one contact, Y and b are of the form
     // Y = [zeros(3, 1); 0; 0; 0; omega; 1, zeros(3,1)];
     // b = [zeros(3, 1); 0; 0; 0; zeros(3, 1); 1, zeros(3,1)];
-    m_Yk.segment<4>(yStart) << m_omegab, 1;
+    if (!m_useZeroBaseVelocities)
+    {
+        m_Yk.segment<4>(yStart) << m_omegab, 1;
+    }
+    else
+    {
+        m_Yk.segment<4>(yStart) << 0, 0, 0, 1;
+    }
     m_bk(yStart+3) = 1;
     m_Pik.block<3, 3>(obsStart, yStart) = m_I3;
     m_Hk.block<3, 3>(obsStart, angVelOffset) = m_I3;

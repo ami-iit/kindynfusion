@@ -79,7 +79,7 @@ protected:
     * @param[in] handler configure the custom parameters for the estimator
     * @return bool
     */
-    virtual bool customInitialization(std::weak_ptr<const BipedalLocomotion::ParametersHandler::IParametersHandler> handler) override;
+    virtual bool customInitialization(std::weak_ptr<BipedalLocomotion::ParametersHandler::IParametersHandler> handler) override;
 
 
     bool setupCustomSensorDevs(std::weak_ptr<BipedalLocomotion::ParametersHandler::IParametersHandler> handler);
