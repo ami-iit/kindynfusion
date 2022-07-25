@@ -1,0 +1,62 @@
+repositories:
+  osqp:
+    type: git
+    url: https://github.com/oxfordcontrol/osqp.git
+    version: v0.6.2
+  manif:
+    type: git
+    url: https://github.com/robotology-dependencies/manif.git
+    version: 0.0.4.1
+  qhull:
+    type: git
+    url: https://github.com/qhull/qhull.git
+    version: 2020.2
+  CppAD:
+    type: git
+    url: https://github.com/coin-or/CppAD.git
+    version: 20220000.4
+  casadi:
+    type: git
+    url: https://github.com/ami-iit/casadi.git
+    version: 3.5.5.3
+  YCM:
+    type: git
+    url: https://github.com/robotology/ycm.git
+    version: v0.14.2
+  YARP:
+    type: git
+    url: https://github.com/robotology/yarp.git
+    version: v3.7.2
+  iDynTree:
+    type: git
+    url: https://github.com/robotology/idyntree.git
+    version: 814c7633c27c1286b9140a00aceb6111422687bc
+  OsqpEigen:
+    type: git
+    url: https://github.com/robotology/osqp-eigen.git
+    version: v0.7.0
+  wearables:
+    type: git
+    url: https://github.com/robotology/wearables.git
+    version: v1.4.0
+  HumanDynamicsEstimation:
+    type: git
+    url: https://github.com/robotology/human-dynamics-estimation.git
+    version: 1907ef1524819da38b60b62e8825dde4216a50bf
+  human-gazebo:
+    type: git
+    url: https://github.com/robotology/human-gazebo.git
+    version: v1.0.1
+  bipedal-locomotion-framework:
+    type: git
+    url: https://github.com/ami-iit/bipedal-locomotion-framework.git
+    version: bb20f7e4a267a0eb5c377f43a3e7c278ac48ce4b
+  matioCpp:
+    type: git
+    url: https://github.com/ami-iit/matio-cpp.git
+    version: 2ae69473953112a670cff623e671540466a4a0c5
+  robometry:
+    type: git
+    url: https://github.com/robotology/robometry.git
+    version: af906a4135aba418ba120ac68020d2beb474c965
+
