@@ -16,7 +16,7 @@
     </device>
 
     <device type="WholeBodyKinematicsDevice" name="whole_body_kinematics">
-        <param name="period">0.02</param>
+        <param name="period">0.017</param>
         <!--- model data -->
         <param extern-name="model" name="urdf">humanSubject03_48dof.urdf</param>
         <param name="baseFrame">Pelvis</param>
@@ -256,11 +256,15 @@
         <!-- negative sign implies, the floor is below the foot link,
              which is used for calibration of world frame-->
         <param name="constant_floor_height">-0.139254</param>
-        <param extern-name="flat_floor" name="force_flat_floor">false</param>
+        <param extern-name="flat_floor" name="force_flat_floor">true</param>
 
         <group name="BaseEstimator">
             <param name="use_model_info">true</param>
             <param name="sampling_period_in_s">0.02</param>
+
+            <param name="use_velocity_measurements">false</param>
+            <param name="use_zero_base_velocity">false</param> <!-- used only when use_velocity_measurements set to true -->
+
             <group name="ModelInfo">
                 <param name="base_link">Pelvis</param>
                 <param name="base_link_imu">Pelvis</param>
@@ -275,16 +279,19 @@
                 <param name="use_static_ldmks_pose_measure">false</param>
             </group>
             <group name="SensorsStdDev">
-                <param name="contact_foot_linear_velocity_noise_std_dev">(1e-8 1e-8 1e-8)</param>
-                <param name="contact_foot_angular_velocity_noise_std_dev">(1e-8 1e-8 1e-8)</param>
-                <param name="swing_foot_linear_velocity_noise_std_dev">(1e3 1e3 1e3)</param>
-                <param name="swing_foot_angular_velocity_noise_std_dev">(1e3 1e3 1e3)</param>
-                <param name="forward_kinematic_measurement_noise_std_dev">(1e5 1e5 1e5 1e5 1e5 1e5)</param>
-                <param name="encoders_measurement_noise_std_dev">(0.000174533)</param>
-                <param name="map_height_std_dev">(316.2278 316.2278 0.0000236 316.2278 316.2278 316.2278)</param>
-                <param name="imu_frame_linear_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
-                <param name="imu_frame_angular_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
-                <param name="imu_frame_gyro_noise_std_dev">(0.005 0.005 0.005)</param>
+                <param name="contact_foot_linear_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="contact_foot_angular_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="swing_foot_linear_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
+                <param name="swing_foot_angular_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
+                <param name="forward_kinematic_measurement_noise_std_dev">(1e-5 1e-5 1e-5 1e-5 1e-5 1e-5)</param>
+                <param name="encoders_measurement_noise_std_dev">(1e-5)</param>
+                <!--param name="swing_foot_angular_velocity_noise_std_dev">(1e5 1e5 1e5)</param>
+                <param name="forward_kinematic_measurement_noise_std_dev">(1e5 1e5 1e5 1e8 1e8 1e8)</param>
+                <param name="encoders_measurement_noise_std_dev">(0.00174533)</param-->
+                <param name="map_height_std_dev">(316.2278 316.2278 1e-8 316.2278 316.2278 316.2278)</param>
+                <param name="imu_frame_linear_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="imu_frame_angular_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="imu_frame_gyro_noise_std_dev">(1e-5 1e-5 1e-5)</param>
             </group>
             <group name="PriorsStdDev">
                 <param name="imu_orientation">(0.00174533 0.00174533 0.00174533)</param>
@@ -325,12 +332,23 @@
         <action phase="shutdown" level="5" type="detach"/>
     </device>
 
+    <device type="WholeBodyKinematicsWrapper" name="whole_body_kinematics_wrapper">
+        <param name="period">0.02</param>
+        <param name="outputPort">/HDE1/WholeBodyKinematicsWrapper/state:o</param>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="WholeBodyKinematicsWrapperLabel">whole_body_kinematics</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
     <device type="iwear_remapper" name="IWearRemapper">
         <param name="wearableDataPorts">(/iFeelSuit/WearableData/data:o)</param>
     </device>
 
     <device type="human_wrench_provider" name="HumanWrenchProvider">
-        <param name="period">0.100</param>
+        <param name="period">0.020</param>
         <param extern-name="model" name="human_urdf">humanSubject03_48dof.urdf</param>
         <param name="pHRIScenario">false</param>
         <param name="number_of_sources">2</param>
@@ -395,7 +413,7 @@
     </device>
 
     <device type="human_dynamics_estimator" name="HumanDynamicsEstimator">
-        <param name="period">0.5</param>
+        <param name="period">0.02</param>
         <param extern-name="model" name="urdf">humanSubject03_48dof.urdf</param>
         <param name="baseLink">Pelvis</param>
         <param name="number_of_wrench_sensors">2</param>
@@ -458,7 +476,7 @@
     </device>
 
     <device type="human_dynamics_wrapper" name="HumanDynamicsWrapper">
-        <param name="period">0.1</param>
+        <param name="period">0.02</param>
         <param name="outputPort">/HDE/HumanDynamicsWrapper/torques:o</param>
         <action phase="startup" level="5" type="attach">
             <paramlist name="networks">
