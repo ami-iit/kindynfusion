@@ -408,7 +408,6 @@ void WholeBodyKinematicsDevice::updateWholeBodyKinematicsSolution()
     {
         EstimatedContactPosition cpos;
         cpos.name = name;
-        std::cout << name << ": " << pos.toString()<< std::endl;
         for (auto idx = 0; idx < 3; idx++)
         {
             cpos.position[idx] = pos.getVal(idx);
