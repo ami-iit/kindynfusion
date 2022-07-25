@@ -23,7 +23,7 @@ checkandset_dependency(OsqpEigen)
 find_package(HumanDynamicsEstimation QUIET)
 checkandset_dependency(HumanDynamicsEstimation)
 
-find_package(YARP 3.5.0 QUIET)
+find_package(YARP 3.7.0 QUIET)
 checkandset_dependency(YARP)
 
 find_package(manif 0.0.4 QUIET)
