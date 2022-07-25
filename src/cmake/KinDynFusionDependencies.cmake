@@ -7,26 +7,30 @@ include(KinDynFusionFindDependencies)
 ################################################################################
 # Find all packages
 
-find_package(iDynTree 1.1.0 REQUIRED) 
+find_package(iDynTree 3.0.0 REQUIRED)
 find_package(Eigen3 3.2.92 REQUIRED)
-find_package(spdlog REQUIRED)
-find_package(BipedalLocomotionFramework REQUIRED)
-find_package(IWear REQUIRED)
+find_package(spdlog 1.5.0 REQUIRED)
+find_package(BipedalLocomotionFramework 0.7.0 REQUIRED)
+find_package(IWear 1.4.0 REQUIRED)
 
 find_package(YARP COMPONENTS telemetry)
 
-find_package(OsqpEigen 0.4.0 QUIET)
+find_package(OsqpEigen 0.7.0 QUIET)
 checkandset_dependency(OsqpEigen)
 
+# make sure commit https://github.com/robotology/human-dynamics-estimation/commit/1907ef1524819da38b60b62e8825dde4216a50bf
+# is checked out in the human-dynamics-estimation project
 find_package(HumanDynamicsEstimation QUIET)
 checkandset_dependency(HumanDynamicsEstimation)
 
-find_package(YARP QUIET)
+find_package(YARP 3.5.0 QUIET)
 checkandset_dependency(YARP)
 
-find_package(manif QUIET)
+find_package(manif 0.0.4 QUIET)
 checkandset_dependency(manif)
 
+# make sure commit https://github.com/ami-iit/matio-cpp/commit/2ae69473953112a670cff623e671540466a4a0c5
+# is checked out in the matio-cpp project
 find_package(matioCpp QUIET)
 checkandset_dependency(matioCpp)
 
