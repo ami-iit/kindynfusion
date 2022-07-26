@@ -11,7 +11,7 @@ Please check the [dependencies](./how-to/dependencies.md) page for the full list
 
 ### Prerequisites
 
-Please follow the instructions in the [installation prerequisites](./how-to/install-prerquisites.md) for setting up the environment to launch the `KinDynFusion` software.
+Please follow the instructions in the [installation prerequisites](./how-to/install-prerequisites.md) for setting up the environment to launch the `KinDynFusion` software.
 
 ### Install KinDynFusion
 
