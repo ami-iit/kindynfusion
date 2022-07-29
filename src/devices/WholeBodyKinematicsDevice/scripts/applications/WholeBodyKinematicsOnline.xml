@@ -1,0 +1,57 @@
+<application>
+
+  <name>Whole Body Kinematics Estimator Online</name>
+  <description>launch applications for running whole body kinematics with offline datastreaming</description>
+
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematicsiFeelSuit.xml</parameters>
+    <node>localhost</node>
+    <tag>WBK-iFeelSuit</tag>
+  </module>
+  
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematicsHumanState.xml --model humanSubject07_48dof.urdf --fz_make 70.0 --fz_break 30.0 --flat_floor true</parameters>
+    <node>localhost</node>
+    <dependencies>
+      <port timeout="15.0">/iFeelSuit/WearableData/data:o</port>
+    </dependencies>
+    <tag>WBK-HumanState</tag>
+  </module>
+    
+  <module>
+    <name>HumanStateVisualizer</name>
+    <parameters>--from HumanStateVisualizer.ini --humanStateDataPortName /HDE/WholeBodyKinematicsHumanStateWrapper/state:o --humanWrenchWrapperPortName /HDE/HumanWrenchWrapper/wrench:o --context 2022_04_Aereoporti_Roma</parameters>
+    <dependencies>
+          <port timeout="15.0">/HDE/WholeBodyKinematicsHumanStateWrapper/state:o</port>
+          <port timeout="15.0">/HDE/HumanWrenchWrapper/wrench:o</port>
+    </dependencies>
+    <description>Run HumanStateVisualizer</description>
+    <node>localhost</node>
+    <tag>HumanStateVisualizer</tag>
+  </module>
+
+  <module>
+    <name>yarprobotstatepublisher</name>
+    <parameters>--period 0.0001 --name-prefix Human --tf-prefix /Human/ --model humanSubject07_48dof.urdf --reduced-model true --base-frame Pelvis --jointstates-topic "/Human/joint_states"</parameters>
+    <dependencies>
+      <port timeout="15.0">/HumanDynamicsPublisher</port>
+      <port timeout="15.0">/Human/joint_states+@/HumanStatePublisher</port>
+      <port timeout="15.0">/tf+@/HumanStatePublisher</port>
+    </dependencies>
+    <description>Run yarprobotstatepublisher</description>
+    <node>localhost</node>
+  </module>
+  
+  <!--Rviz-->
+  <module>
+    <name>roslaunch</name>
+    <parameters>HDERviz HDERviz.launch</parameters>
+    <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+    <description>Run rviz</description>
+    <node>localhost</node>
+  </module>
+
+</application>
+

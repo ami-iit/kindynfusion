@@ -1,0 +1,44 @@
+<application>
+  <name>Whole Body Kinematics Estimator Startup</name>
+  <description>launch applications for running whole body kinematics with offline datastreaming</description>
+
+  <var name="operatorId">1</var>
+
+  <module>
+    <name>yarpdataplayer</name>
+    <parameters>--withExtraTimeCol 2</parameters>
+    <node>localhost</node>
+  </module>
+  
+  <module>
+    <name>yarpdev</name>
+    <parameters>--device transformServer --ROS::enable_ros_publisher 0 --ROS::enable_ros_subscriber 0
+</parameters>
+    <node>localhost</node>
+  </module>
+  
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematics_iFeelSuit_fullBody_1_Subject08_FtShoes41.xml</parameters>
+    <node>localhost</node>
+    <tag>WBK</tag>
+  </module>
+  
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematicsVisualizer.xml</parameters>
+    <node>localhost</node>
+    <tag>WBKViz</tag>
+  </module>
+
+
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config WholeBodyKinematicsLogger.xml</parameters>
+    <node>localhost</node>
+    <tag>WBKViz</tag>
+  </module>
+
+
+</application>
+
