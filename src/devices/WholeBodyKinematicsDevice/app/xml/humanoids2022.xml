@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.0//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.0.dtd">
+<robot name="Human-HDE" build=0 portprefix="">
+
+    <device type="transformServer" name="TransformServer">
+        <param name="transforms_lifetime">0.2</param>
+        <group name="ROS">
+            <param name="enable_ros_publisher">true</param>
+            <param name="enable_ros_subscriber">false</param>
+        </group>
+    </device>
+
+    <device type="iwear_remapper" name="IWearRemapper">
+        <param name="wearableDataPorts">(/iFeelSuit1/WearableData/data:o)</param>
+        <param name="useRPC">false</param>
+    </device>
+
+    <device type="WholeBodyKinematicsDevice" name="whole_body_kinematics">
+        <param name="period">0.02</param>
+        <!--- model data -->
+        <param extern-name="model" name="urdf">humanSubject08_48dof.urdf</param>
+        <param name="baseFrame">Pelvis</param>
+        <param name="jointList">("jT9T8_rotx",
+                                 "jT9T8_roty",
+                                 "jT9T8_rotz",
+                                 "jRightShoulder_rotx",
+                                 "jRightShoulder_roty",
+                                 "jRightShoulder_rotz",
+                                 "jRightElbow_roty",
+                                 "jRightElbow_rotz",
+                                 "jLeftShoulder_rotx",
+                                 "jLeftShoulder_roty",
+                                 "jLeftShoulder_rotz",
+                                 "jLeftElbow_roty",
+                                 "jLeftElbow_rotz",
+                                 "jLeftHip_rotx",
+                                 "jLeftHip_roty",
+                                 "jLeftHip_rotz",
+                                 "jLeftKnee_roty",
+                                 "jLeftKnee_rotz"
+                                 "jLeftAnkle_rotx",
+                                 "jLeftAnkle_roty",
+                                 "jLeftAnkle_rotz",
+                                 "jRightHip_rotx",
+                                 "jRightHip_roty",
+                                 "jRightHip_rotz",
+                                 "jRightKnee_roty",
+                                 "jRightKnee_rotz",
+                                 "jRightAnkle_rotx",
+                                 "jRightAnkle_roty",
+                                 "jRightAnkle_rotz")
+        </param>
+
+        <!-- IK Parameters -->
+        <!-- ikSolver options: pairwised, global, dynamical -->
+        <param name="ikSolver">dynamical</param>
+        <param name="useFixedBase">false</param>
+
+        <!-- Dynamical IK Parameters -->
+        <!-- inverseVelocityKinematicsSolver values:
+             QP
+             moorePenrose,
+             completeOrthogonalDecomposition,
+             leastSquare,
+             choleskyDecomposition,
+             sparseCholeskyDecomposition,
+             robustCholeskyDecomposition,
+             sparseRobustCholeskyDecomposition -->
+        <param name='inverseVelocityKinematicsSolver'>QP</param>
+        <param name="useDirectBaseMeasurement">false</param>
+        <param name="costRegularization">0.000001</param>
+        <param name="linVelTargetWeight">1.0</param>
+        <param name="angVelTargetWeight">1.0</param>
+        <param name='dynamicalIKJointVelocityLimit'>4.0</param> <!-- comment or -1.0 for no limits -->
+        <param name="dynamicalIKMeasuredVelocityGainLinRot">(1.0 1.0)</param>
+        <param name="dynamicalIKCorrectionGainsLinRot">(8.0 20.0)</param>
+        <!-- The following two parameters should be set always , if not set they are by default 0.5 -->
+        <param name="k_u">0.5</param>
+        <param name="k_l">0.5</param>
+
+         <group name="WEARABLE_SENSOR_TARGETS">
+            <!-- LinkName, WearableSensorName, TargetType-->
+            <param name="target_Pelvis">(Pelvis, iFeelSuit::vLink::Node#3, orientationAndVelocity)</param>
+            <param name="target_T8">(T8, iFeelSuit::vLink::Node#6, orientationAndVelocity)</param>
+            <param name="target_RightUpperArm">(RightUpperArm, iFeelSuit::vLink::Node#7, orientationAndVelocity)</param>
+            <param name="target_RightForeArm">(RightForeArm, iFeelSuit::vLink::Node#8, orientationAndVelocity)</param>
+            <param name="target_LeftUpperArm">(LeftUpperArm, iFeelSuit::vLink::Node#5, orientationAndVelocity)</param>
+            <param name="target_LeftForeArm">(LeftForeArm, iFeelSuit::vLink::Node#4, orientationAndVelocity)</param>
+            <param name="target_RightUpperLeg">(RightUpperLeg, iFeelSuit::vLink::Node#11, orientationAndVelocity)</param>
+            <param name="target_RightLowerLeg">(RightLowerLeg, iFeelSuit::vLink::Node#12, orientationAndVelocity)</param>
+            <param name="target_RightFoot">(RightFoot, iFeelSuit::vLink::Node#2, orientationAndVelocity)</param>
+            <param name="target_LeftUpperLeg">(LeftUpperLeg, iFeelSuit::vLink::Node#9, orientationAndVelocity)</param>
+            <param name="target_LeftLowerLeg">(LeftLowerLeg, iFeelSuit::vLink::Node#10, orientationAndVelocity)</param>
+            <param name="target_LeftFoot">(LeftFoot, iFeelSuit::vLink::Node#1, orientationAndVelocity)</param>
+            <!--<param name="target_RightToe">(RightToe, iFeelSuit::ft6D::Node#2, floorContact)</param>
+            <param name="target_LeftToe">(LeftToe, iFeelSuit::ft6D::Node#1, floorContact)</param>-->
+        </group>
+        <group name="MEASUREMENT_TO_LINK_TRANSFORMS">
+            <param name="target_LeftUpperLeg">( 1.0   0.0   0.0  0.0
+                                                0.0   0.0  -1.0  0.0
+                                                0.0   1.0   0.0  0.0
+                                                0.0   0.0   0.0  1.0)</param>
+            <param name="target_LeftLowerLeg">( 1.0   0.0   0.0  0.0
+                                                0.0   0.0  -1.0  0.0
+                                                0.0   1.0   0.0  0.0
+                                                0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightUpperLeg">( 1.0   0.0   0.0  0.0
+                                                 0.0   0.0   1.0  0.0
+                                                 0.0  -1.0   0.0  0.0
+                                                 0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightLowerLeg">( 1.0   0.0   0.0  0.0
+                                                 0.0   0.0   1.0  0.0
+                                                 0.0  -1.0   0.0  0.0
+                                                 0.0   0.0   0.0  1.0)</param>
+            <param name="target_Pelvis">( 0.0   1.0   0.0  0.0
+                                          0.0   0.0  -1.0  0.0
+                                         -1.0   0.0   0.0  0.0
+                                          0.0   0.0   0.0  1.0)</param>
+            <param name="target_T8">( 0.0   1.0   0.0  0.0
+                                      0.0   0.0   1.0  0.0
+                                      1.0   0.0   0.0  0.0
+                                      0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightFoot">(  0.0   1.0   0.0  0.0
+                                             -1.0   0.0   0.0  0.0
+                                              0.0   0.0   1.0  0.0
+                                              0.0   0.0   0.0  1.0)</param>
+            <param name="target_LeftFoot">(  0.0   1.0   0.0  0.0
+                                            -1.0   0.0   0.0  0.0
+                                             0.0   0.0   1.0  0.0
+                                             0.0   0.0   0.0  1.0)</param>
+        </group>
+        <group name="CUSTOM_CONSTRAINTS">
+            <!-- check issue https://github.com/robotology/human-dynamics-estimation/issues/132 for more info-->
+            <!-- note that a group can not be empty, otherwise it returns error-->
+            <!-- custom joint limits velocities-->
+            <!--param name="custom_joints_velocity_limits_names">(neck_roll, neck_pitch)</param-->
+            <param name="custom_joints_velocity_limits_names">()</param>
+            <!-- the upper bound is "+", while the lower bounds are "-" -->
+            <!--param name="custom_joints_velocity_limits_values">(10.0, 15.0)</param-->
+            <param name="custom_joints_velocity_limits_values">()</param>
+            <!-- **** base velocity limit: x, y, z, roll, pitch, yaw ****-->
+            <param name="base_velocity_limit_upper_bound">(100.0, 100.0, 100.0 , 100.0, 100.0, 100.0 )</param>
+            <param name="base_velocity_limit_lower_bound">(-100.0, -100.0, -100.0, -100.0, -100.0, -100.0 )</param>
+            <!-- Custom joint Configuration constraints-->
+            <!-- if the boudary value is inf, I will use -1000.0 rad, or +1000.0 rad-->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0 ),
+                (-1.0,    0.0,    0.0,    0.0 ),
+                ( 0.0,    1.0,    0.0,    0.0 ),
+                ( 0.0,   -1.0,    0.0,    0.0 ),
+                ( 0.0,    0.0,    1.0,    0.0 ),
+                ( 0.0,    0.0,    0.0,    1.0 ))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0,   0.0, -100.0)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0, 100.0,    0.0)</param>-->
+
+            <!-- use this for CoM swinging experiments -->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0, -0.3, -0.3,  -0.3, -0.3)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,  0.3,  0.3,   0.3,  0.3)</param>-->
+
+            <!-- use this for walking experiments -->
+            <param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0, -200.0,    0.0,  -200.0,    0.0)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,    0.0,  200.0,     0.0,  200.0)</param>
+
+            <!-- use this for squatting experiments -->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx, jLeftKnee_roty, jRightKnee_roty, jLeftAnkle_roty, jRightAnkle_roty)</param>
+             <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   1.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   1.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0,   -0.02,    -0.02, -0.02,    -0.02, -100.0, -100.0, -100.0, -100.0 )</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,    0.02,     0.02,  0.02,     0.02,  100.0,     100.0, 100.0, 100.0 )</param>-->
+        </group>
+
+
+        <group name="WEARABLE_SENSOR_SHOES">
+            <!-- transformation matrix of foot to shoe merged -->
+            <!-- see https://github.com/ami-iit/element_sandals/wiki/Specifications -->
+            <param name="iFeelSuit::ft6D::Node#1">(LeftFoot,
+                                              ( 1.0   0.0  0.0  -0.02
+                                                0.0   1.0  0.0    0.0
+                                                0.0   0.0  1.0 -0.135
+                                                0.0   0.0  0.0  1.0 ))</param>
+            <param name="iFeelSuit::ft6D::Node#2">(RightFoot,
+                                               (1.0   0.0  0.0  -0.02
+                                                0.0   1.0  0.0    0.0
+                                                0.0   0.0  1.0 -0.135
+                                                0.0   0.0  0.0    1.0 ))</param>
+        </group>
+
+        <!-- FTShoe2 - FT44 bounding box 0.31x0.09, top left vertex 0.261x0.05 -->
+        <!-- Add some safety bounds for the box boundaries 0.09 + 0.04 = 0.094-->
+        <group name="FOOT_DATA">
+            <param name="foot_link_names">(LeftFoot, RightFoot)</param>
+            <group name="LeftFoot">
+                <param name="wearable_name">iFeelSuit::ft6D::Node#1</param>
+                <param name="sole_frame">LeftSole</param>
+                <!-- sole lies at the bottom of the shoe,
+                add half height of foot box (~0.039254 m) to shoe height to ground (~0.1 m) -->
+                <param name="sole_position_in_foot">(0., 0., -0.093254)</param>
+                <param name="sole_rpy_degrees_in_foot">(0., 0., 0.)</param>
+                <param name="foot_length">0.269</param>
+                <param name="foot_width">0.090</param>
+                <param name="fz_threshold_for_cop">2.0</param>
+                <param extern-name="fz_make" name="schmitt_make_threshold">20.0</param>
+                <param extern-name="fz_break" name="schmitt_break_threshold">5.0</param>
+                <param name="schmitt_make_switch_time">0.01</param>
+                <param name="schmitt_break_switch_time">0.01</param>
+                <param name="top_left_vertex_in_sole">(0.219, 0.045, 0.0)</param>
+            </group>
+            <group name="RightFoot">
+                <param name="wearable_name">iFeelSuit::ft6D::Node#2</param>
+                <param name="sole_frame">RightSole</param>
+                <param name="sole_position_in_foot">(0., 0., -0.093254)</param>
+                <param name="sole_rpy_degrees_in_foot">(0., 0., 0.)</param>
+                <param name="foot_length">0.269</param>
+                <param name="foot_width">0.090</param>
+                <param name="fz_threshold_for_cop">2.0</param>
+                <param extern-name="fz_make" name="schmitt_make_threshold">20.0</param>
+                <param extern-name="fz_break" name="schmitt_break_threshold">5.0</param>
+                <param name="schmitt_make_switch_time">0.01</param>
+                <param name="schmitt_break_switch_time">0.01</param>
+                <param name="top_left_vertex_in_sole">(0.219, 0.045, 0.0)</param>
+            </group>
+        </group>
+
+        <!-- negative sign implies, the floor is below the foot link,
+             which is used for calibration of world frame-->
+        <param name="constant_floor_height">-0.0903254</param>
+        <param extern-name="flat_floor" name="force_flat_floor">true</param>
+
+        <group name="BaseEstimator">
+            <param name="use_model_info">true</param>
+            <param name="sampling_period_in_s">0.02</param>
+
+            <param name="use_velocity_measurements">false</param>
+            <param name="use_zero_base_velocity">false</param> <!-- used only when use_velocity_measurements set to true -->
+
+            <group name="ModelInfo">
+                <param name="base_link">Pelvis</param>
+                <param name="base_link_imu">Pelvis</param>
+                <!-- Foot sole orientation -->
+                <param name="left_foot_contact_frame">LeftSole</param>
+                <param name="right_foot_contact_frame">RightSole</param>
+            </group>
+            <group name="Options">
+                <param name="enable_imu_bias_estimation">false</param>
+                <param name="enable_ekf_update">true</param>
+                <param name="use_kinematics_measure">true</param>
+                <param name="use_static_ldmks_pose_measure">false</param>
+            </group>
+            <group name="SensorsStdDev">
+                <param name="contact_foot_linear_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="contact_foot_angular_velocity_noise_std_dev">(1e-5 1e-5 1e-5)</param>
+                <param name="swing_foot_linear_velocity_noise_std_dev">(1e2 1e2 1e2)</param>
+                <param name="swing_foot_angular_velocity_noise_std_dev">(1e2 1e2 1e2)</param>
+                <param name="forward_kinematic_measurement_noise_std_dev">(1e-1 1e-1 1e-1 1e-2 1e-2 1e-2)</param>
+                <param name="encoders_measurement_noise_std_dev">(1e-3)</param>
+                <param name="map_height_std_dev">(316.2278 316.2278 1e-5 316.2278 316.2278 316.2278)</param>
+                <param name="imu_frame_linear_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
+                <param name="imu_frame_angular_velocity_noise_std_dev">(1e1 1e1 1e1)</param>
+                <param name="imu_frame_gyro_noise_std_dev">(1e-2 1e-2 1e-2)</param>
+            </group>
+            <group name="PriorsStdDev">
+                <param name="imu_orientation">(0.00174533 0.00174533 0.00174533)</param>
+                <param name="imu_position">(1e-2 1e-2 1e-2)</param>
+                <param name="imu_linear_velocity">(1e-2 1e-2 1e-2)</param>
+                <param name="imu_angular_velocity">(1e-3 1e-3 1e-3)</param>>
+                <param name="r_contact_frame_orientation">(0.00174533 0.00174533 0.00174533)</param>
+                <param name="l_contact_frame_orientation">(0.00174533 0.00174533 0.00174533)</param>
+            </group>
+            <!-- Initial states will be placeholder setting, later reset through RPC call -->
+            <group name="InitialStates">
+                <param name="imu_orientation_quaternion_wxyz">(1.0 0.0 0.0 0.0)</param>
+                <param name="imu_position_xyz">(0.0 0.0 0.0)</param>
+                <param name="imu_linear_velocity_xyz">(0.0 0.0 0.0)</param>
+                <param name="imu_angular_velocity_xyz">(0.0 0.0 0.0)</param>
+                <param name="l_contact_frame_orientation_quaternion_wxyz">(1.0 0.0 0.0 0.0)</param>
+                <param name="r_contact_frame_orientation_quaternion_wxyz">(1.0 0.0 0.0 0.0)</param>
+            </group>
+        </group>
+
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="HumanStateProviderLabel">IWearRemapper</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+    <!-- Uncomment to stream the output of HumanStateProvider on a YARP port -->
+    <device type="WholeBodyKinematicsWrapper" name="whole_body_kinematics_wrapper">
+        <param name="period">0.02</param>
+        <param name="outputPort">/HDE/WholeBodyKinematicsWrapper/state:o</param>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="WholeBodyKinematicsWrapperLabel">whole_body_kinematics</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+
+</robot>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.0//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.0.dtd">
+<robot name="Human-HDE" build=0 portprefix="human-state-provider-1">
+
+    <device type="iwear_remapper" name="IWearRemapper">
+        <param name="wearableDataPorts">(/iFeelSuit1/WearableData/data:o)</param>
+    </device>
+
+    <device type="human_state_provider" name="HumanStateProvider">
+        <param name="period">0.02</param>
+        <param name="urdf">humanSubject08_48dof.urdf</param>
+        <param name="floatingBaseFrame">Pelvis</param>
+        <!-- ikSolver options: pairwised, global, dynamical -->
+        <param name="ikSolver">dynamical</param>
+        <param name="allowIKFailures">true</param>
+        <param name="useDirectBaseMeasurement ">false</param>
+        <!-- optimization parameters -->
+        <param name="maxIterationsIK">300</param>
+        <param name="ikLinearSolver">ma27</param>
+        <param name="ikPoolSizeOption">2</param>
+        <param name="posTargetWeight">0.0</param>
+        <param name="rotTargetWeight">1.0</param>
+        <param name="costRegularization">0.000001</param>
+        <param name="costTolerance">0.001</param>
+        <param name="rpcPortPrefix">first</param>
+        <!-- inverse velocity kinematics parameters -->
+        <!-- inverseVelocityKinematicsSolver values:
+        QP
+        moorePenrose,
+        completeOrthogonalDecomposition,
+        leastSquare,
+        choleskyDecomposition,
+        sparseCholeskyDecomposition,
+        robustCholeskyDecomposition,
+        sparseRobustCholeskyDecomposition -->
+        <param name='inverseVelocityKinematicsSolver'>QP</param>
+        <param name="linVelTargetWeight">1.0</param>
+        <param name="angVelTargetWeight">1.0</param>
+        <!-- integration based IK parameters -->
+        <param name='dynamicalIKJointVelocityLimit'>10.0</param> <!-- comment or -1.0 for no limits -->
+        <param name="dynamicalIKMeasuredVelocityGainLinRot">(1.0 1.0)</param>
+        <param name="dynamicalIKCorrectionGainsLinRot">(8.0 20.0)</param>
+        <param name="dynamicalIKIntegralCorrectionGainsLinRot">(0.0 0.0)</param>
+        <group name="WEARABLE_SENSOR_TARGETS">
+            <!-- LinkName, WearableSensorName, TargetType-->
+            <param name="target_Pelvis">(Pelvis, iFeelSuit::vLink::Node#3, orientationAndVelocity)</param>
+            <param name="target_T8">(T8, iFeelSuit::vLink::Node#6, orientationAndVelocity)</param>
+            <param name="target_RightUpperArm">(RightUpperArm, iFeelSuit::vLink::Node#7, orientationAndVelocity)</param>
+            <param name="target_RightForeArm">(RightForeArm, iFeelSuit::vLink::Node#8, orientationAndVelocity)</param>
+            <param name="target_LeftUpperArm">(LeftUpperArm, iFeelSuit::vLink::Node#5, orientationAndVelocity)</param>
+            <param name="target_LeftForeArm">(LeftForeArm, iFeelSuit::vLink::Node#4, orientationAndVelocity)</param>
+            <param name="target_RightUpperLeg">(RightUpperLeg, iFeelSuit::vLink::Node#11, orientationAndVelocity)</param>
+            <param name="target_RightLowerLeg">(RightLowerLeg, iFeelSuit::vLink::Node#12, orientationAndVelocity)</param>
+            <param name="target_RightFoot">(RightFoot, iFeelSuit::vLink::Node#2, orientationAndVelocity)</param>
+            <param name="target_LeftUpperLeg">(LeftUpperLeg, iFeelSuit::vLink::Node#9, orientationAndVelocity)</param>
+            <param name="target_LeftLowerLeg">(LeftLowerLeg, iFeelSuit::vLink::Node#10, orientationAndVelocity)</param>
+            <param name="target_LeftFoot">(LeftFoot, iFeelSuit::vLink::Node#1, orientationAndVelocity)</param>
+            <param name="target_RightToe">(RightToe, iFeelSuit::ft6D::Node#2, floorContact)</param>
+            <param name="target_LeftToe">(LeftToe, iFeelSuit::ft6D::Node#1, floorContact)</param>
+        </group>
+        <group name="CONTACT_THRESHOLDS">
+            <param name="target_RightToe">20.0</param>
+            <param name="target_LeftToe">20.0</param>
+        </group>
+        <param name="jointList">("jT9T8_rotx",
+                                 "jT9T8_roty",
+                                 "jT9T8_rotz",
+                                 "jRightShoulder_rotx",
+                                 "jRightShoulder_roty",
+                                 "jRightShoulder_rotz",
+                                 "jRightElbow_roty",
+                                 "jRightElbow_rotz",
+                                 "jLeftShoulder_rotx",
+                                 "jLeftShoulder_roty",
+                                 "jLeftShoulder_rotz",
+                                 "jLeftElbow_roty",
+                                 "jLeftElbow_rotz",
+                                 "jLeftHip_rotx",
+                                 "jLeftHip_roty",
+                                 "jLeftHip_rotz",
+                                 "jLeftKnee_roty",
+                                 "jLeftKnee_rotz"
+                                 "jLeftAnkle_rotx",
+                                 "jLeftAnkle_roty",
+                                 "jLeftAnkle_rotz",
+                                 "jLeftBallFoot_roty",
+                                 "jRightHip_rotx",
+                                 "jRightHip_roty",
+                                 "jRightHip_rotz",
+                                 "jRightKnee_roty",
+                                 "jRightKnee_rotz",
+                                 "jRightAnkle_rotx",
+                                 "jRightAnkle_roty",
+                                 "jRightAnkle_rotz",
+                                 "jRightBallFoot_roty")
+        </param>
+        <group name="MEASUREMENT_TO_LINK_TRANSFORMS">
+            <param name="target_LeftUpperLeg">( 1.0   0.0   0.0  0.0
+                                                0.0   0.0  -1.0  0.0
+                                                0.0   1.0   0.0  0.0
+                                                0.0   0.0   0.0  1.0)</param>
+            <param name="target_LeftLowerLeg">( 1.0   0.0   0.0  0.0
+                                                0.0   0.0  -1.0  0.0
+                                                0.0   1.0   0.0  0.0
+                                                0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightUpperLeg">( 1.0   0.0   0.0  0.0
+                                                 0.0   0.0   1.0  0.0
+                                                 0.0  -1.0   0.0  0.0
+                                                 0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightLowerLeg">( 1.0   0.0   0.0  0.0
+                                                 0.0   0.0   1.0  0.0
+                                                 0.0  -1.0   0.0  0.0
+                                                 0.0   0.0   0.0  1.0)</param>
+            <param name="target_Pelvis">( 0.0   1.0   0.0  0.0
+                                          0.0   0.0  -1.0  0.0
+                                         -1.0   0.0   0.0  0.0
+                                          0.0   0.0   0.0  1.0)</param>
+            <param name="target_T8">( 0.0   1.0   0.0  0.0
+                                      0.0   0.0   1.0  0.0
+                                      1.0   0.0   0.0  0.0
+                                      0.0   0.0   0.0  1.0)</param>
+            <param name="target_RightFoot">(  0.0   1.0   0.0  0.0
+                                             -1.0   0.0   0.0  0.0
+                                              0.0   0.0   1.0  0.0
+                                              0.0   0.0   0.0  1.0)</param>
+            <param name="target_LeftFoot">(  0.0   1.0   0.0  0.0
+                                            -1.0   0.0   0.0  0.0
+                                             0.0   0.0   1.0  0.0
+                                             0.0   0.0   0.0  1.0)</param>
+        </group>
+        <group name="CUSTOM_CONSTRAINTS">
+            <!-- check issue https://github.com/robotology/human-dynamics-estimation/issues/132 for more info-->
+            <!-- note that a group can not be empty, otherwise it returns error-->
+            <!-- custom joint limits velocities-->
+            <!--param name="custom_joints_velocity_limits_names">(neck_roll, neck_pitch)</param-->
+            <param name="custom_joints_velocity_limits_names">()</param>
+            <!-- the upper bound is "+", while the lower bounds are "-" -->
+            <!--param name="custom_joints_velocity_limits_values">(10.0, 15.0)</param-->
+            <param name="custom_joints_velocity_limits_values">()</param>
+            <!-- **** base velocity limit: x, y, z, roll, pitch, yaw ****-->
+            <param name="base_velocity_limit_upper_buond">(100.0, 100.0, 100.0 , 100.0, 100.0, 100.0 )</param>
+            <param name="base_velocity_limit_lower_buond">(-100.0, -100.0, -100.0, -100.0, -100.0, -100.0 )</param>
+            <!-- Custom joint Configuration constraints-->
+            <!-- if the boudary value is inf, I will use -1000.0 rad, or +1000.0 rad-->
+           <!-- <param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0),
+                (-1.0,    0.0,    0.0,    0.0),
+                ( 0.0,    1.0,    0.0,    0.0),
+                ( 0.0,   -1.0,    0.0,    0.0),
+                ( 0.0,    0.0,    1.0,    0.0),
+                ( 0.0,    0.0,    0.0,    1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0,   0.0, -100.0)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0, 100.0,    0.0)</param> -->
+
+
+            <!-- use this for CoM swinging experiments -->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0, -0.3, -0.3,  -0.3, -0.3)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,  0.3,  0.3,   0.3,  0.3)</param>-->
+
+            <!-- use this for walking experiments -->
+            <param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx)</param>
+            <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0, -200.0,    0.0,  -200.0,    0.0)</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,    0.0,  200.0,     0.0,  200.0)</param>
+
+            <!-- use this for squatting experiments -->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx, jLeftKnee_roty, jRightKnee_roty, jLeftAnkle_roty, jRightAnkle_roty)</param>
+             <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   1.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   1.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0,   -0.02,    -0.02, -0.02,    -0.02, -100.0, -100.0, -100.0, -100.0 )</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,    0.02,     0.02,  0.02,     0.02,  100.0,     100.0, 100.0, 100.0 )</param>-->
+
+
+            <!-- use this for generic experiments -->
+            <!--<param name="custom_constraint_variables">(jLeftKnee_rotz, jRightKnee_rotz, jLeftHip_rotx, jRightHip_rotx, jLeftAnkle_rotx, jRightAnkle_rotx, jLeftKnee_roty, jRightKnee_roty, jLeftAnkle_roty, jRightAnkle_roty)</param>
+             <param name="custom_constraint_matrix"> (
+                ( 1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                (-1.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,   -1.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    1.0,    0.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    1.0    0.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    1.0   0.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   1.0   0.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   1.0   0.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   1.0  0.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  1.0   0.0),
+                ( 0.0,    0.0,    0.0,    0.0    0.0   0.0   0.0   0.0  0.0   1.0))</param>
+            <param name="custom_constraint_lower_bound"> (0.0, 0.0, 0.0, 0.0,   -0.3,    -0.3, -0.3,    -0.3, -100.0, -100.0, -100.0, -100.0 )</param>
+            <param name="custom_constraint_upper_bound"> (0.0, 0.0, 0.0, 0.0,    0.3,     0.3,  0.3,     0.3,  100.0,     100.0, 100.0, 100.0 )</param>-->
+
+            <!-- The following two parameters should be set always , if not set they are by default 0.5 -->
+            <param name="k_u">0.5</param>
+            <param name="k_l">0.5</param>
+        </group>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="HumanStateProviderLabel">IWearRemapper</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+    <device type="human_state_wrapper" name="HumanStateWrapper">
+        <param name="period">0.02</param>
+        <param name="outputPort">/HDE1/HumanStateWrapper/state:o</param>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="HumanStateWrapperLabel">HumanStateProvider</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+    <device type="wearable_targets_wrapper" name="WearableTargetsWrapper">
+        <param name="period">0.01</param>
+        <param name="outputPort">/HDE1/WearableTargetsWrapper/state:o</param>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                <elem name="HumanStateWrapperLabel">HumanStateProvider</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach"/>
+    </device>
+
+    <device type="human_wrench_provider" name="HumanWrenchProvider">
+        <param name="period">0.100</param>
+        <param name="human_urdf">humanSubject01_66dof.urdf</param>
+        <param name="pHRIScenario">false</param>
+        <param name="number_of_sources">2</param>
+        <param name="sources">(iFeelSuit::ft6D::Node#1 iFeelSuit::ft6D::Node#2)</param>
+        <group name="iFeelSuit::ft6D::Node#1">
+            <param name="sensorName">iFeelSuit::ft6D::Node#1</param>
+            <param name="outputFrame">LeftFoot</param>
+            <param name="type">fixed</param>
+            <param name="rotation">(1.0 0.0 0.0
+                                    0.0 1.0 0.0
+                                    0.0 0.0 1.0)</param>
+            <param name="position">(0.0 0.0 0.0)</param>
+        </group>
+        <group name="iFeelSuit::ft6D::Node#2">
+            <param name="sensorName">iFeelSuit::ft6D::Node#2</param>
+            <param name="outputFrame">RightFoot</param>
+            <param name="type">fixed</param>
+            <param name="rotation">(1.0 0.0 0.0
+                                    0.0 1.0 0.0
+                                    0.0 0.0 1.0)</param>
+            <param name="position">(0.0 0.0 0.0)</param>
+        </group>
+        <action phase="startup" level="5" type="attach">
+            <paramlist name="networks">
+                 <elem name="HumanWrenchProviderLabelFTShoeLeft">IWearRemapper</elem>
+            </paramlist>
+        </action>
+        <action phase="shutdown" level="5" type="detach" />
+    </device>
+
+    <device type="analogServer" name="HumanWrenchWrapper">
+      <param name="name">/HDE1/HumanWrenchWrapper/wrench:o</param>
+      <param name="period">10</param>
+      <action phase="startup" level="5" type="attach">
+        <paramlist name="networks">
+            <elem name="HumanWrenchWrapperLabel">HumanWrenchProvider</elem>
+        </paramlist>
+      </action>
+      <action phase="shutdown" level="5" type="detach" />
+    </device>
+
+</robot>
