@@ -1,5 +1,7 @@
 ### Launching Whole Body Kinematics Estimation
 
+### Overview
+
 - [Using  logged data streaming](#Using  logged data streaming)
 - [Running online with a sensor suit device](#Running online with a sensor suit device)
 
