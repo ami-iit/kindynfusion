@@ -1,6 +1,7 @@
 ### Launching Whole Body Kinematics Estimation
 
-- [Using  logged data streaming](#Using logged data streaming)
+- [Using  logged data streaming](#Using  logged data streaming)
+- [Running online with a sensor suit device](#Running online with a sensor suit device)
 
 #### Using  logged data streaming
 
@@ -52,6 +53,12 @@
 
 
 **P.S. A `yarpmanager` application has been created in order to launch these steps from a GUI. This can be found in [WholeBodyKinematicsStartupOffline.xml](./../src/devices/WholeBodyKinematicsDevice/scripts/applications/WholeBodyKinematicsStartupOffline.xml).**
+
+
+
+### Running online with a sensor suit device
+
+Launching the kinematics estimation with online with data being streamed over the network using a `iFeelSuitDevice` or an [`XSensSuitDevice`](https://github.com/robotology/wearables/tree/master/devices/XsensSuit) follows the same procedure, except the `yarpdataplayer` step is replaced by launching the respective suit. 
 
 
 
