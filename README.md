@@ -54,3 +54,13 @@ which should print
 [INFO] |yarp.dev.Drivers| Device "WholeBodyKinematicsRemapper", available on request (found in <where-you-installed-kindynfusion>/lib/yarp/WholeBodyKinematicsRemapper.so library).
 [INFO] |yarp.dev.Drivers| Device "WholeBodyKinematicsVisualizerDevice", available on request (found in <where-you-installed-kindynfusion>/lib/yarp/WholeBodyKinematicsVisualizerDevice.so library).
 ```
+
+
+
+### Launching the Estimator
+
+
+
+### Parameter Configuration
+
+The description for the configuration of parameters required for several submodules of whole body kinematics estimation is provided in the [parameter configuration file](./how-to/parameters-config.md).
