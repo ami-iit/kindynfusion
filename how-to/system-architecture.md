@@ -25,7 +25,7 @@ Meanwhile, a `WholeBodyKinematicsWrapper` which is a Network Wrapper Server (NWS
 
 All the estimated data available over the `IWholeBodyKinematics` interface is serialized into a `WholeBodyKinematicsMsg` using the thrift mechanism in order to published onto a port over the network.
 
-`WholeBodyKinematicsRemapper` which is a Network Wrapper Clieant (NWC), and ideally should be called as `WholeBodyKinematicsNWC` reads the port and deserializes the `WholeBodyKinematicsMsg` and exposes the data to client side devices.
+`WholeBodyKinematicsRemapper` which is a Network Wrapper Client (NWC), and ideally should be called as `WholeBodyKinematicsNWC` reads the port and deserializes the `WholeBodyKinematicsMsg` and exposes the data to client side devices.
 
 `WholeBodyKinematicsVisualizerDevice` and `WholeBodyKinematicsLogger` are such client side devices that attach themselves to `WholeBodyKinematicsRemapper` and access the estimated outputs through the `IWholeBodyKinematics` interface for visualization and debugging.
 
