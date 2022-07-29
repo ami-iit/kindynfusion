@@ -57,9 +57,13 @@ which should print
 
 
 
+### System Architecture
+
+The overall architecture and data flow for the whole body kinematics estimation is described in the [system-architecture](./how-to/system-architecture.md) page.
+
 ### Launching the Estimator
 
-
+Please check [launching whole body kinematics](./how-to/launching-wbk.md) to understand how to launch the estimator.
 
 ### Parameter Configuration
 
