@@ -32,8 +32,8 @@ bool WholeBodyKinematicsVisualizer::initialize()
 
     m_viz.setColorPalette("meshcat");
 
-    m_viz.enviroment().setBackgroundColor(grey);
-    m_viz.enviroment().setFloorGridColor(black);
+    m_viz.environment().setBackgroundColor(grey);
+    m_viz.environment().setFloorGridColor(black);
     return true;
 }
 
