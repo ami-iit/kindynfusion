@@ -12,7 +12,7 @@ if(FRAMEWORK_COMPILE_Model)
     NAME                   Model
     PUBLIC_HEADERS         ${H_PREFIX}/RectangularFoot.h
     SOURCES                src/RectangularFoot.cpp
-    PUBLIC_LINK_LIBRARIES  Eigen3::Eigen MANIF::manif iDynTree::idyntree-high-level iDynTree::idyntree-modelio-urdf iDynTree::idyntree-model iDynTree::idyntree-solid-shapes BipedalLocomotion::TextLogging BipedalLocomotion::ParametersHandler BipedalLocomotion::Math
+    PUBLIC_LINK_LIBRARIES  Eigen3::Eigen MANIF::manif iDynTree::idyntree-high-level iDynTree::idyntree-modelio iDynTree::idyntree-model iDynTree::idyntree-solid-shapes BipedalLocomotion::TextLogging BipedalLocomotion::ParametersHandler BipedalLocomotion::Math
     )
 
 endif()

@@ -15,6 +15,6 @@ if (FRAMEWORK_COMPILE_InverseKinematics AND
                            YARP::YARP_sig
                            iDynTree::idyntree-model
                            iDynTree::idyntree-core
-                           iDynTree::idyntree-modelio-urdf
+                           iDynTree::idyntree-modelio
     INSTALLATION_FOLDER    InverseKinematics)
 endif()
