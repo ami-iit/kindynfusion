@@ -12,7 +12,7 @@
 #include <KinDynFusion/msgs/WholeBodyKinematicsOutput.h>
 #include <yarp/os/PeriodicThread.h>
 #include <yarp/dev/DeviceDriver.h>
-#include <yarp/dev/PreciselyTimed.h>
+#include <yarp/dev/IPreciselyTimed.h>
 #include <yarp/os/TypedReaderCallback.h>
 
 #include <memory>
